@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    /* 保持原有的樣式設定 */
+    :root { --primary: #d32f2f; --accent: #ff5252; --bg: #fdfaf0; --text: #333; --green: #2e7d32; --orange: #ef6c00; --line: #06C755; }
+    body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; padding: 10px 10px 200px 10px; color: var(--text); -webkit-tap-highlight-color: transparent; }
+    .shop-header { background: white; padding: 18px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 20px; border: 1px solid #eee; display: flex; align-items: flex-start; text-align: left; gap: 15px; }
+    .shop-logo { width: 75px; height: 75px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; flex-shrink: 0; }
+    .shop-info-text { flex: 1; }
+    .shop-info-text h2 { margin: 0 0 5px 0; color: var(--primary); font-size: 20px; }
+    .contact-link { color: #555; text-decoration: none; font-size: 14px; display: block; margin: 6px 0; line-height: 1.4; }
+    .contact-hint { font-size: 14px; color: #999; margin-left: 4px; border: 1px solid #ddd; padding: 1px 4px; border-radius: 4px; }
+    .line-btn { display: inline-flex; align-items: center; background: var(--line); color: white; padding: 6px 15px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 13px; margin-top: 8px; }
+    .group-box { border: 2px solid #e0c0b0; border-radius: 18px; padding: 25px 15px 15px; background: #fffcf5; margin-bottom: 30px; position: relative; }
+    .group-label { position: absolute; top: -15px; left: 15px; background: #5d4037; color: white; padding: 3px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; z-index: 10; border: 2px solid #fff; }
+    .card { background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 12px; margin-bottom: 15px; }
+    .item-layout { display: flex; gap: 12px; align-items: flex-start; }
+    .item-img { width: 95px; height: 95px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+    .item-info { flex: 1; min-width: 0; }
+    .opt-container { margin: 8px 0; }
+    .opt-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .opt-tag { padding: 6px 12px; border-radius: 6px; background: white; border: 1px solid #ccc; cursor: pointer; color: #666; font-size: 13px; }
+    .opt-tag.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
+    #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; }
+    .modal-body { background: white; width: 85%; max-width: 320px; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .modal-title { font-size: 18px; font-weight: bold; color: var(--text); margin-bottom: 10px; }
+    .modal-detail { font-size: 15px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+    .modal-btn-group { display: flex; gap: 10px; }
+    .modal-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; border: none; }
+    .btn-confirm { background: var(--green); color: white; }
+    .btn-cancel { background: #eee; color: #666; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 2px; padding-bottom: env(safe-area-inset-bottom, 20px); border-top: 5px solid var(--primary); z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+    .footer-grid { display: grid; grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr; align-items: center; text-align: center; gap: 2px; }
+    .f-col { display: flex; flex-direction: column; justify-content: center; height: 60px; border-right: 1px solid #eee; }
+    .f-col:last-child { border-right: none; }
+    .footer-label { color: #555; font-size: 13px; font-weight: bold; margin-bottom: 4px; line-height: 1.2; }
+    .price-big { color: var(--primary); font-size: 22px; font-weight: 900; line-height: 1; }
+    .count-label { color: var(--green); font-size: 18px; font-weight: bold; }
+    .market-label { color: var(--orange); font-size: 12px; font-weight: bold; line-height: 1.2; white-space: pre-wrap; }
+    .send-btn { background: var(--primary); color: white; border: none; width: 95%; height: 50px; border-radius: 10px; font-weight: bold; font-size: 18px; margin: 0 auto; }
+    .add-btn-full { background: var(--green); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; white-space: nowrap; }
+    .cat-title { color: #5d4037; font-weight: 900; border-left: 5px solid var(--primary); padding-left: 12px; margin-bottom: 15px; font-size: 18px; }
+    .text-in { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; margin-top: 8px; box-sizing: border-box; }
+    #success-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #5d4037; z-index: 2000; padding: 20px; overflow-y: auto; }
+    .receipt { background: white; border-radius: 20px; padding: 25px; max-width: 500px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+
+<div id="custom-modal">
+  <div class="modal-body">
+    <div id="modal-title" class="modal-title">標題</div>
+    <div id="modal-content" class="modal-detail"></div>
+    <div class="modal-btn-group">
+      <button id="modal-cancel-btn" class="modal-btn btn-cancel" onclick="closeModal()">取消</button>
+      <button id="modal-confirm-btn" class="modal-btn btn-confirm">確認</button>
+    </div>
+  </div>
+</div>
+
+<div id="main-content">
+  <div class="shop-header">
+    <img src="https://i.postimg.cc/hjwkj8XM/logo.jpg" class="shop-logo">
+    <div class="shop-info-text">
+      <h2>天母大頭鵝</h2>
+      <a href="tel:0933877340" class="contact-link">📞 0933-877-340 <span class="contact-hint">點擊通話</span></a>
+      <a href="https://maps.google.com/?q=天母東路8巷21號" target="_blank" class="contact-link">📍 天母東路8巷21號 <span class="contact-hint">點擊導覽</span></a>
+      <a href="https://line.me/R/ti/p/@856bpknn" target="_blank" class="line-btn">🟢 加入 LINE 好友</a>
+    </div>
+  </div>
+
+  <div class="group-box">
+    <div class="group-label">一、聯絡資訊</div>
+    <div style="margin-bottom:12px;">手機<span style="color:red;">*</span>：<input type="tel" id="uPhone" class="text-in"></div>
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <div style="flex:1;">貴姓<span style="color:red;">*</span>：<input type="text" id="uName" class="text-in"></div>
+      <div style="padding-top:35px;"><label><input type="radio" name="uTitle" value="帥哥" checked> 帥哥</label> <label><input type="radio" name="uTitle" value="美女"> 美女</label></div>
+    </div>
+    <div style="font-weight:bold; font-size:14px;">取餐時間<span style="color:red;">*</span>：</div>
+    <div class="opt-row" id="pick-time-group"></div>
+    <div style="font-weight:bold; font-size:14px; margin-top:10px;">訂金方式<span style="color:red;">*</span>：</div>
+    <div class="opt-row" id="deposit-group"></div>
+    <div style="background:#fff3e0; padding:12px; border-radius:12px; margin-top:15px; border: 1px dashed #ff9800;">
+      <div id="excel-note-display" style="color:#d32f2f; font-weight:bold; font-size:18px; margin-bottom:5px;">載入中...</div>
+      <label style="font-size:14px;"><input type="checkbox" id="noteConfirm"> 我已確認公告內容 <span style="color:red;">*</span></label>
+    </div>
+  </div>
+
+  <div class="group-box"><div class="group-label">二、餐點選購</div><div id="menu-area"></div></div>
+  <div class="group-box"><div class="group-label">三、購物車明細</div><div id="cart-area" style="text-align:center; color:#999; padding:20px 0;">尚未選擇餐點</div></div>
+</div>
+
+<div class="footer" id="footer-bar">
+  <div class="footer-grid">
+    <div class="f-col">
+      <div class="footer-label">金額(不含時價)</div>
+      <div class="price-big">$<span id="total">0</span></div>
+    </div>
+    <div class="f-col">
+      <div class="footer-label">已選數量</div>
+      <div class="count-label"><span id="item-qty">0</span> 份</div>
+    </div>
+    <div class="f-col"><div class="market-label" id="market-msg">無時價項目</div></div>
+    <div class="f-col"><button class="send-btn" id="sendBtn" onclick="prepareSend()">送出</button></div>
+  </div>
+</div>
+
+<div id="success-overlay">
+  <div class="receipt">
+    <h2 style="color:var(--green); text-align:center;">🎉 訂購成功</h2>
+    <div id="receipt-content" style="line-height:2.2; border-top:1px solid #eee; padding-top:15px;"></div>
+    <div style="text-align:center; color:#d32f2f; font-weight:bold; margin-top:15px; font-size:15px;">(時價品項請依取貨時報價為準)</div>
+  </div>
+</div>
+
+<script>
+  let cart = []; let selPick = ""; let selDeposit = "";
+  let tempItem = null;
+
+  // --- GitHub 版專用：填入您的 GAS 部署網址 ---
+  const GAS_URL = "在此填入您的_GAS_網頁應用程式網址_包含exec的部分"; 
+
+  window.onload = async function() { 
+
+    // --- 修改：使用 fetch 替代 google.script.run.getMenu ---
+    try {
+      const response = await fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getMenu" })
+      });
+      const res = await response.json();
+      
+      document.getElementById('excel-note-display').innerHTML = res.noteReminder.replace(/\n/g, '<br>');
+      document.getElementById('pick-time-group').innerHTML = res.pickTimes.map(t => `<div class="opt-tag" onclick="selGroup(this,'pick')">${t}</div>`).join('');
+      document.getElementById('deposit-group').innerHTML = res.depositWays.map(d => `<div class="opt-tag" onclick="selGroup(this,'deposit')">${d}</div>`).join('');
+      draw(res.menu); 
+    } catch (err) {
+      console.error(err);
+      document.getElementById('excel-note-display').innerText = "系統加載失敗，請檢查網路連接。";
+    }
+  };
+
+  // 保持原有 UI 邏輯
+  function selGroup(el, type) {
+    el.parentElement.querySelectorAll('.opt-tag').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    if(type === 'pick') selPick = el.innerText; else selDeposit = el.innerText;
+  }
+
+  function draw(data) {
+    const area = document.getElementById('menu-area');
+    area.innerHTML = ""; // 清空載入中狀態
+    const cats = [...new Set(data.map(i => i.category))];
+    cats.forEach(cat => {
+      let catHtml = `<div class="menu-section"><div class="cat-title">${cat}</div>`;
+      data.filter(i => i.category === cat).forEach((item, idx) => {
+        let boxId = `box_${cat.replace(/\s/g,'')}_${idx}`;
+        let optHtml = '';
+        if(item.group1 && item.group1.length > 0) optHtml += `<div class="opt-row group1">${item.group1.map((o,i)=>`<div class="opt-tag ${i===0?'active':''}" onclick="sel(this)">${o}</div>`).join('')}</div>`;
+        if(item.group2 && item.group2.length > 0) optHtml += `<div class="opt-row group2">${item.group2.map((o,i)=>`<div class="opt-tag ${i===0?'active':''}" onclick="sel(this)">${o}</div>`).join('')}</div>`;
+
+        catHtml += `<div class="card" id="${boxId}">
+            <div class="item-layout">
+              <img src="${item.img || ''}" class="item-img" onerror="this.style.display='none'">
+              <div class="item-info">
+                <div style="display:flex; justify-content:space-between;">
+                  <b style="font-size:16px;">${item.name}</b>
+                  <span style="color:red; font-weight:bold;">${item.price==0?'時價秤重':'$'+item.price}</span>
+                </div>
+                <div class="opt-container">${optHtml}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <button style="width:30px; height:30px; border-radius:50%; border:1px solid #ccc; background:#fff;" onclick="qty('${boxId}',-1)">-</button>
+                    <b id="q_${boxId}">1</b>
+                    <button style="width:30px; height:30px; border-radius:50%; border:1px solid #ccc; background:#fff;" onclick="qty('${boxId}',1)">+</button>
+                  </div>
+                  <button class="add-btn-full" onclick="showAddConfirm('${item.name}',${item.price},'${boxId}')">加入購物車</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      });
+      area.innerHTML += catHtml + `</div>`;
+    });
+  }
+
+  function qty(id, d) { let el = document.getElementById('q_'+id); el.innerText = Math.max(1, parseInt(el.innerText) + d); }
+  function sel(el) { el.parentElement.querySelectorAll('.opt-tag').forEach(t => t.classList.remove('active')); el.classList.add('active'); }
+  function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
+
+  function showAddConfirm(name, price, boxId) {
+    const q = parseInt(document.getElementById('q_'+boxId).innerText);
+    let tags = []; 
+    document.getElementById(boxId).querySelectorAll('.opt-tag.active').forEach(t => tags.push(t.innerText));
+    tempItem = { name, price, opts: tags, qty: q };
+    document.getElementById('modal-title').innerText = "確認加入購物車？";
+    document.getElementById('modal-content').innerHTML = `<b>${name}</b><br>${tags.join(' / ') || ' '}<br>數量：${q} 份`;
+    document.getElementById('modal-cancel-btn').style.display = 'none';
+    document.getElementById('modal-confirm-btn').onclick = function() {
+        let exist = cart.find(i => i.name === tempItem.name && i.opts.join() === tempItem.opts.join());
+        if(exist) exist.qty += tempItem.qty; else cart.push({...tempItem});
+        render(); closeModal();
+    };
+    document.getElementById('custom-modal').style.display = 'flex';
+  }
+
+  function prepareSend() {
+    const p = document.getElementById('uPhone').value; const n = document.getElementById('uName').value;
+    if(!p || !n || !selPick || !selDeposit || cart.length === 0 || !document.getElementById('noteConfirm').checked) return alert("請填妥資訊與確認公告！");
+    document.getElementById('modal-title').innerText = "確認送出訂單？";
+    document.getElementById('modal-content').innerHTML = `請再次檢查取餐時間與聯絡資訊。<br><span style="color:red; font-weight:bold;">送出後將無法自行更改！</span>`;
+    document.getElementById('modal-cancel-btn').style.display = 'block';
+    document.getElementById('modal-confirm-btn').onclick = sendOrder;
+    document.getElementById('custom-modal').style.display = 'flex';
+  }
+
+  // --- 修改：使用 fetch 替代 google.script.run.processOrder ---
+  async function sendOrder() {
+    closeModal();
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+    sendBtn.innerText = "送出中...";
+
+    let mCount = 0;
+    const summaryStr = cart.map(i => {
+      if(i.price === 0) mCount += i.qty;
+      return `${i.name}${i.opts.length?`(${i.opts.join('/')})`:''}x${i.qty}${i.price==0?'(時價)':''}`;
+    }).join('\n');
+
+    const data = { 
+        phone: document.getElementById('uPhone').value, 
+        name: document.getElementById('uName').value, 
+        title: document.querySelector('input[name="uTitle"]:checked').value, 
+        pickTime: selPick, 
+        deposit: selDeposit, 
+        total: document.getElementById('total').innerText, 
+        summary: summaryStr 
+    };
+
+    try {
+      const response = await fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "processOrder", data: data })
+      });
+      const result = await response.json();
+
+      if (result) {
+        const lineID = "@856bpknn";
+        const textMsg = `【天母大頭鵝訂單】\n貴姓：${data.name}${data.title}\n電話：${data.phone}\n時間：${data.pickTime}\n付款：${data.deposit}\n【訂單系統已記錄，切勿自行更改，如需修改請來電】`;
+        const lineUrl = "https://line.me/R/oaMessage/" + lineID + "/?" + encodeURIComponent(textMsg);
+
+        document.getElementById('receipt-content').innerHTML = `
+          <b>訂購人：</b>${data.name}${data.title}<br>
+          <b>電話：</b>${data.phone}<br>
+          <b>取餐：</b><span style="color:red; font-weight:bold;">${data.pickTime}</span><br>  
+          <b>支付：</b>${data.deposit}<hr>
+          <pre style="font-family:inherit; white-space:pre-wrap; font-size:15px;">${data.summary}</pre><hr>
+          <h3 style="text-align:right; color:red; margin:0;">現金合計(不含時價品項)：$${data.total}</h3>
+          <div style="margin-top:20px;">
+            <a href="${lineUrl}" style="display:block; background:#06C755; color:white; text-align:center; padding:12px; border-radius:10px; text-decoration:none; font-weight:bold;">🟢 點我傳送訂單至 LINE</a>
+          </div>
+        `;
+        document.getElementById('success-overlay').style.display = 'block';
+        window.scrollTo(0,0);
+      }
+    } catch (err) {
+      alert("傳送失敗，請聯繫店家！");
+      sendBtn.disabled = false;
+      sendBtn.innerText = "重新送出";
+    }
+  }
+
+  function render() {
+    const area = document.getElementById('cart-area');
+    if(cart.length === 0) { area.innerHTML = '尚未選擇餐點'; updateT(); return; }
+    area.innerHTML = cart.map((item, i) => `
+      <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #ddd;">
+        <div style="text-align:left;"><b>${item.name}</b><br><small style="color:#666;">${item.opts.join(' / ')} x ${item.qty}</small></div>
+        <div style="text-align:right;"><b style="color:red;">${item.price==0?'時價':'$'+(item.price*item.qty)}</b><br><span onclick="del(${i})" style="color:#999; font-size:12px;">[刪除]</span></div>
+      </div>`).join('');
+    updateT();
+  }
+
+  function del(i) { cart.splice(i, 1); render(); }
+
+  function updateT() {
+    let t = 0; let m = 0; let totalQty = 0;
+    cart.forEach(i => { totalQty += i.qty; if(i.price > 0) t += i.price * i.qty; else m += i.qty; });
+    document.getElementById('total').innerText = t.toLocaleString();
+    document.getElementById('item-qty').innerText = totalQty;
+    document.getElementById('market-msg').innerText = m > 0 ? `時價項目\n共 ${m} 份` : "無時價項目";
+  }
+</script>
+</body>
+</html>
