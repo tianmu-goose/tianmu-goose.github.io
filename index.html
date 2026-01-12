@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     /* 保持原有的樣式設定 */
-    :root { --primary: #d32f2f; --accent: #ff5252; --bg: #fdfaf0; --text: #333; --green: #2e7d32; --orange: #ef6c00; --line: #06C755; }
-    body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; padding: 10px 10px 200px 10px; color: var(--text); -webkit-tap-highlight-color: transparent; }
+    :root { --primary: #d32f2f; --accent: #ff5252; --bg: #fdfaf0; --text: #333; --green: #2e7d32; --orange: #ef6c00; --line: #06C755; --subtle-brown: #a67c52; }
+    body { font-family: -apple-system, sans-serif; background-color: var(--bg); margin: 0; padding: 10px 10px 200px 10px; color: var(--text); -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
     .shop-header { background: white; padding: 18px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 20px; border: 1px solid #eee; display: flex; align-items: flex-start; text-align: left; gap: 15px; }
     .shop-logo { width: 75px; height: 75px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; flex-shrink: 0; }
     .shop-info-text { flex: 1; }
@@ -25,23 +25,31 @@
     .opt-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     .opt-tag { padding: 6px 12px; border-radius: 6px; background: white; border: 1px solid #ccc; cursor: pointer; color: #666; font-size: 13px; }
     .opt-tag.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
+    
     #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; }
-    .modal-body { background: white; width: 85%; max-width: 320px; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-    .modal-title { font-size: 18px; font-weight: bold; color: var(--text); margin-bottom: 10px; }
-    .modal-detail { font-size: 15px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+    .modal-body { background: white; width: 90%; max-width: 360px; border-radius: 20px; padding: 20px; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 85vh; overflow-y: auto; }
+    .modal-title { font-size: 18px; font-weight: bold; color: var(--text); margin-bottom: 10px; text-align: center; }
+    .modal-detail { font-size: 14px; color: #333; margin-bottom: 20px; line-height: 1.6; }
     .modal-btn-group { display: flex; gap: 10px; }
     .modal-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; border: none; }
     .btn-confirm { background: var(--green); color: white; }
     .btn-cancel { background: #eee; color: #666; }
+    
     .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 2px; padding-bottom: env(safe-area-inset-bottom, 20px); border-top: 5px solid var(--primary); z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
-    .footer-grid { display: grid; grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr; align-items: center; text-align: center; gap: 2px; }
+    .footer-grid { display: grid; grid-template-columns: 1fr 0.7fr 0.7fr 1.1fr 0.8fr; align-items: center; text-align: center; gap: 2px; }
     .f-col { display: flex; flex-direction: column; justify-content: center; height: 60px; border-right: 1px solid #eee; }
     .f-col:last-child { border-right: none; }
-    .footer-label { color: #555; font-size: 13px; font-weight: bold; margin-bottom: 4px; line-height: 1.2; }
-    .price-big { color: var(--primary); font-size: 22px; font-weight: 900; line-height: 1; }
-    .count-label { color: var(--green); font-size: 18px; font-weight: bold; }
-    .market-label { color: var(--orange); font-size: 12px; font-weight: bold; line-height: 1.2; white-space: pre-wrap; }
-    .send-btn { background: var(--primary); color: white; border: none; width: 95%; height: 50px; border-radius: 10px; font-weight: bold; font-size: 18px; margin: 0 auto; }
+    .footer-label { color: #555; font-size: 11px; font-weight: bold; margin-bottom: 4px; line-height: 1.2; }
+    .price-big { color: var(--primary); font-size: 18px; font-weight: 900; line-height: 1; }
+    .count-label { color: var(--green); font-size: 16px; font-weight: bold; }
+    .market-label { color: var(--orange); font-size: 11px; font-weight: bold; line-height: 1.2; white-space: pre-wrap; }
+    
+    /* 修改：送出按鈕 */
+    .send-btn { background: var(--primary); color: white; border: none; width: 95%; height: 50px; border-radius: 10px; font-weight: bold; font-size: 16px; margin: 0 auto; }
+    
+    /* 修改：查看購物車按鈕 - 改為棕黃色、字體加大與送出按鈕一致 */
+    .view-cart-btn { background: var(--subtle-brown); color: white; border: none; width: 92%; height: 50px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin: 0 auto; }
+
     .add-btn-full { background: var(--green); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; white-space: nowrap; }
     .cat-title { color: #5d4037; font-weight: 900; border-left: 5px solid var(--primary); padding-left: 12px; margin-bottom: 15px; font-size: 18px; }
     .text-in { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; margin-top: 8px; box-sizing: border-box; }
@@ -56,7 +64,7 @@
     <div id="modal-title" class="modal-title">標題</div>
     <div id="modal-content" class="modal-detail"></div>
     <div class="modal-btn-group">
-      <button id="modal-cancel-btn" class="modal-btn btn-cancel" onclick="closeModal()">取消</button>
+      <button id="modal-cancel-btn" class="modal-btn btn-cancel" onclick="closeModal()">回上一頁</button>
       <button id="modal-confirm-btn" class="modal-btn btn-confirm">確認</button>
     </div>
   </div>
@@ -91,7 +99,7 @@
   </div>
 
   <div class="group-box"><div class="group-label">二、餐點選購</div><div id="menu-area"></div></div>
-  <div class="group-box"><div class="group-label">三、購物車明細</div><div id="cart-area" style="text-align:center; color:#999; padding:20px 0;">尚未選擇餐點</div></div>
+  <div class="group-box" id="cart-section"><div class="group-label">三、購物車明細</div><div id="cart-area" style="text-align:center; color:#999; padding:20px 0;">尚未選擇餐點</div></div>
 </div>
 
 <div class="footer" id="footer-bar">
@@ -105,6 +113,9 @@
       <div class="count-label"><span id="item-qty">0</span> 份</div>
     </div>
     <div class="f-col"><div class="market-label" id="market-msg">無時價項目</div></div>
+    <div class="f-col">
+      <button class="view-cart-btn" onclick="scrollToCart()">查看購物車</button>
+    </div>
     <div class="f-col"><button class="send-btn" id="sendBtn" onclick="prepareSend()">送出</button></div>
   </div>
 </div>
@@ -121,12 +132,9 @@
   let cart = []; let selPick = ""; let selDeposit = "";
   let tempItem = null;
 
-  // --- GitHub 版專用：填入您的 GAS 部署網址 ---
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxxYCu_JHRkt4v4oS0PvL9KGCdmnbRUzzfreDBcNojaAEvJf2zbZ8zJRBVH_wHOriZh/exec"; 
 
   window.onload = async function() { 
-
-    // --- 修改：使用 fetch 替代 google.script.run.getMenu ---
     try {
       const response = await fetch(GAS_URL, {
         method: "POST",
@@ -144,7 +152,10 @@
     }
   };
 
-  // 保持原有 UI 邏輯
+  function scrollToCart() {
+    document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
   function selGroup(el, type) {
     el.parentElement.querySelectorAll('.opt-tag').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
@@ -153,7 +164,7 @@
 
   function draw(data) {
     const area = document.getElementById('menu-area');
-    area.innerHTML = ""; // 清空載入中狀態
+    area.innerHTML = ""; 
     const cats = [...new Set(data.map(i => i.category))];
     cats.forEach(cat => {
       let catHtml = `<div class="menu-section"><div class="cat-title">${cat}</div>`;
@@ -209,16 +220,37 @@
   }
 
   function prepareSend() {
-    const p = document.getElementById('uPhone').value; const n = document.getElementById('uName').value;
+    const p = document.getElementById('uPhone').value; 
+    const n = document.getElementById('uName').value;
+    const t = document.querySelector('input[name="uTitle"]:checked').value;
+    const total = document.getElementById('total').innerText;
+
     if(!p || !n || !selPick || !selDeposit || cart.length === 0 || !document.getElementById('noteConfirm').checked) return alert("請填妥資訊與確認公告！");
-    document.getElementById('modal-title').innerText = "確認送出訂單？";
-    document.getElementById('modal-content').innerHTML = `請再次檢查取餐時間與聯絡資訊。<br><span style="color:red; font-weight:bold;">送出後將無法自行更改！</span>`;
+
+    const summaryStr = cart.map(i => {
+      return `・${i.name}${i.opts.length?`(${i.opts.join('/')})`:''} x ${i.qty}${i.price==0?'(時價)':''}`;
+    }).join('<br>');
+
+    document.getElementById('modal-title').innerText = "最後確認訂單資訊";
+    document.getElementById('modal-content').innerHTML = `
+      <div style="background:#f9f9f9; padding:12px; border-radius:10px; border:1px solid #eee;">
+        <b>訂購人：</b>${n}${t}<br>
+        <b>電話：</b>${p}<br>
+        <b>取餐時間：</b><span style="color:red; font-weight:bold;">${selPick}</span><br>
+        <b>付款方式：</b>${selDeposit}<hr style="border:0; border-top:1px dashed #ccc;">
+        <div style="max-height:150px; overflow-y:auto; margin:10px 0;">
+          ${summaryStr}
+        </div>
+        <hr style="border:0; border-top:1px dashed #ccc;">
+        <div style="text-align:right; font-weight:bold; color:red;">合計(不含時價)：$${total}</div>
+      </div>
+      <p style="color:red; font-size:12px; margin-top:10px; text-align:center;">※送出後將無法自行更改！</p>
+    `;
     document.getElementById('modal-cancel-btn').style.display = 'block';
     document.getElementById('modal-confirm-btn').onclick = sendOrder;
     document.getElementById('custom-modal').style.display = 'flex';
   }
 
-  // --- 修改：使用 fetch 替代 google.script.run.processOrder ---
   async function sendOrder() {
     closeModal();
     const sendBtn = document.getElementById('sendBtn');
