@@ -44,17 +44,17 @@
     .count-label { color: var(--green); font-size: 16px; font-weight: bold; }
     .market-label { color: var(--orange); font-size: 11px; font-weight: bold; line-height: 1.2; white-space: pre-wrap; }
     
-    /* 修改：送出按鈕 */
     .send-btn { background: var(--primary); color: white; border: none; width: 95%; height: 50px; border-radius: 10px; font-weight: bold; font-size: 16px; margin: 0 auto; }
-    
-    /* 修改：查看購物車按鈕 - 改為棕黃色、字體加大與送出按鈕一致 */
     .view-cart-btn { background: var(--subtle-brown); color: white; border: none; width: 92%; height: 50px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin: 0 auto; }
 
     .add-btn-full { background: var(--green); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; white-space: nowrap; }
     .cat-title { color: #5d4037; font-weight: 900; border-left: 5px solid var(--primary); padding-left: 12px; margin-bottom: 15px; font-size: 18px; }
     .text-in { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; margin-top: 8px; box-sizing: border-box; }
-    #success-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #5d4037; z-index: 2000; padding: 20px; overflow-y: auto; }
-    .receipt { background: white; border-radius: 20px; padding: 25px; max-width: 500px; margin: 0 auto; }
+    
+    /* 成功視窗樣式優化 */
+    #success-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #5d4037; z-index: 2000; padding: 20px; box-sizing: border-box; align-items: center; justify-content: center; display: none; }
+    .receipt { background: white; border-radius: 20px; padding: 20px; max-width: 450px; width: 100%; margin: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+    .receipt-scroll-area { max-height: 180px; overflow-y: auto; background: #f9f9f9; padding: 10px; border-radius: 10px; margin: 10px 0; border: 1px solid #eee; }
   </style>
 </head>
 <body>
@@ -120,11 +120,11 @@
   </div>
 </div>
 
-<div id="success-overlay">
+<div id="success-overlay" style="display:none;">
   <div class="receipt">
-    <h2 style="color:var(--green); text-align:center;">🎉 訂購成功</h2>
-    <div id="receipt-content" style="line-height:2.2; border-top:1px solid #eee; padding-top:15px;"></div>
-    <div style="text-align:center; color:#d32f2f; font-weight:bold; margin-top:15px; font-size:15px;">(時價品項請依取貨時報價為準)</div>
+    <h2 style="color:var(--green); text-align:center; margin-top:0;">🎉 訂購成功</h2>
+    <div id="receipt-content"></div>
+    <div style="text-align:center; color:#d32f2f; font-weight:bold; margin-top:10px; font-size:14px;">(時價品項請依取貨時報價為準)</div>
   </div>
 </div>
 
@@ -136,25 +136,18 @@
 
   window.onload = async function() { 
     try {
-      const response = await fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "getMenu" })
-      });
+      const response = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getMenu" }) });
       const res = await response.json();
-      
       document.getElementById('excel-note-display').innerHTML = res.noteReminder.replace(/\n/g, '<br>');
       document.getElementById('pick-time-group').innerHTML = res.pickTimes.map(t => `<div class="opt-tag" onclick="selGroup(this,'pick')">${t}</div>`).join('');
       document.getElementById('deposit-group').innerHTML = res.depositWays.map(d => `<div class="opt-tag" onclick="selGroup(this,'deposit')">${d}</div>`).join('');
       draw(res.menu); 
     } catch (err) {
-      console.error(err);
-      document.getElementById('excel-note-display').innerText = "系統加載失敗，請檢查網路連接。";
+      document.getElementById('excel-note-display').innerText = "系統加載失敗，請檢查網路。";
     }
   };
 
-  function scrollToCart() {
-    document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' });
-  }
+  function scrollToCart() { document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' }); }
 
   function selGroup(el, type) {
     el.parentElement.querySelectorAll('.opt-tag').forEach(t => t.classList.remove('active'));
@@ -224,12 +217,9 @@
     const n = document.getElementById('uName').value;
     const t = document.querySelector('input[name="uTitle"]:checked').value;
     const total = document.getElementById('total').innerText;
-
     if(!p || !n || !selPick || !selDeposit || cart.length === 0 || !document.getElementById('noteConfirm').checked) return alert("請填妥資訊與確認公告！");
 
-    const summaryStr = cart.map(i => {
-      return `・${i.name}${i.opts.length?`(${i.opts.join('/')})`:''} x ${i.qty}${i.price==0?'(時價)':''}`;
-    }).join('<br>');
+    const summaryStr = cart.map(i => `・${i.name}${i.opts.length?`(${i.opts.join('/')})`:''} x ${i.qty}${i.price==0?'(時價)':''}`).join('<br>');
 
     document.getElementById('modal-title').innerText = "最後確認訂單資訊";
     document.getElementById('modal-content').innerHTML = `
@@ -238,9 +228,7 @@
         <b>電話：</b>${p}<br>
         <b>取餐時間：</b><span style="color:red; font-weight:bold;">${selPick}</span><br>
         <b>付款方式：</b>${selDeposit}<hr style="border:0; border-top:1px dashed #ccc;">
-        <div style="max-height:150px; overflow-y:auto; margin:10px 0;">
-          ${summaryStr}
-        </div>
+        <div style="max-height:150px; overflow-y:auto; margin:10px 0;">${summaryStr}</div>
         <hr style="border:0; border-top:1px dashed #ccc;">
         <div style="text-align:right; font-weight:bold; color:red;">合計(不含時價)：$${total}</div>
       </div>
@@ -254,55 +242,47 @@
   async function sendOrder() {
     closeModal();
     const sendBtn = document.getElementById('sendBtn');
-    sendBtn.disabled = true;
-    sendBtn.innerText = "送出中...";
+    sendBtn.disabled = true; sendBtn.innerText = "送出中...";
 
-    let mCount = 0;
-    const summaryStr = cart.map(i => {
-      if(i.price === 0) mCount += i.qty;
-      return `${i.name}${i.opts.length?`(${i.opts.join('/')})`:''}x${i.qty}${i.price==0?'(時價)':''}`;
-    }).join('\n');
+    const summaryForMsg = cart.map(i => `${i.name}${i.opts.length?`(${i.opts.join('/')})`:''}x${i.qty}${i.price==0?'(時價)':''}`).join('\n');
+    const summaryForHtml = cart.map(i => `${i.name}${i.opts.length?`(${i.opts.join('/')})`:''} x ${i.qty}${i.price==0?'(時價)':''}`).join('<br>');
 
     const data = { 
         phone: document.getElementById('uPhone').value, 
         name: document.getElementById('uName').value, 
         title: document.querySelector('input[name="uTitle"]:checked').value, 
-        pickTime: selPick, 
-        deposit: selDeposit, 
+        pickTime: selPick, deposit: selDeposit, 
         total: document.getElementById('total').innerText, 
-        summary: summaryStr 
+        summary: summaryForMsg 
     };
 
     try {
-      const response = await fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "processOrder", data: data })
-      });
+      const response = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "processOrder", data: data }) });
       const result = await response.json();
-
       if (result) {
         const lineID = "@856bpknn";
         const textMsg = `【天母大頭鵝訂單】\n貴姓：${data.name}${data.title}\n電話：${data.phone}\n時間：${data.pickTime}\n付款：${data.deposit}\n【訂單系統已記錄，切勿自行更改，如需修改請來電】`;
         const lineUrl = "https://line.me/R/oaMessage/" + lineID + "/?" + encodeURIComponent(textMsg);
 
         document.getElementById('receipt-content').innerHTML = `
-          <b>訂購人：</b>${data.name}${data.title}<br>
-          <b>電話：</b>${data.phone}<br>
-          <b>取餐：</b><span style="color:red; font-weight:bold;">${data.pickTime}</span><br>  
-          <b>支付：</b>${data.deposit}<hr>
-          <pre style="font-family:inherit; white-space:pre-wrap; font-size:15px;">${data.summary}</pre><hr>
-          <h3 style="text-align:right; color:red; margin:0;">現金合計(不含時價品項)：$${data.total}</h3>
-          <div style="margin-top:20px;">
-            <a href="${lineUrl}" style="display:block; background:#06C755; color:white; text-align:center; padding:12px; border-radius:10px; text-decoration:none; font-weight:bold;">🟢 點我傳送訂單至 LINE</a>
+          <div style="font-size:15px; line-height:1.6;">
+            <b>訂購人：</b>${data.name}${data.title}<br>
+            <b>電話：</b>${data.phone}<br>
+            <b>取餐：</b><span style="color:red; font-weight:bold;">${data.pickTime}</span><br>  
+            <b>支付：</b>${data.deposit}
+          </div>
+          <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+          <div class="receipt-scroll-area">${summaryForHtml}</div>
+          <div style="text-align:right; color:red; font-weight:bold; font-size:18px; margin:10px 0;">現金合計(不含時價)：$${data.total}</div>
+          <div style="margin-top:15px;">
+            <a href="${lineUrl}" style="display:block; background:#06C755; color:white; text-align:center; padding:15px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:18px;">🟢 點我傳送訂單至 LINE</a>
           </div>
         `;
-        document.getElementById('success-overlay').style.display = 'block';
+        document.getElementById('success-overlay').style.display = 'flex';
         window.scrollTo(0,0);
       }
     } catch (err) {
-      alert("傳送失敗，請聯繫店家！");
-      sendBtn.disabled = false;
-      sendBtn.innerText = "重新送出";
+      alert("傳送失敗！"); sendBtn.disabled = false; sendBtn.innerText = "重新送出";
     }
   }
 
@@ -316,9 +296,7 @@
       </div>`).join('');
     updateT();
   }
-
   function del(i) { cart.splice(i, 1); render(); }
-
   function updateT() {
     let t = 0; let m = 0; let totalQty = 0;
     cart.forEach(i => { totalQty += i.qty; if(i.price > 0) t += i.price * i.qty; else m += i.qty; });
@@ -328,5 +306,4 @@
   }
 </script>
 </body>
-
 </html>
